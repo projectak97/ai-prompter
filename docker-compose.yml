@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+  prompter:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai-prompt-generator1
+    ports:
+      - "8501:8501"
+    environment:
+      - DEEPSEEK_API_KEY=${DEEPSEEK_API_KEY}
+    env_file:
+      - .env
+    volumes:
+      # Mount for development (optional - uncomment for development)
+      # - ./app.py:/app/app.py
+      # - ./requirements.txt:/app/requirements.txt
+      
+      # Mount for persistent data/logs (optional)
+      - ./logs:/app/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8501/_stcore/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - prompter-network
+
+networks:
+  prompter-network:
+    driver: bridge
+
+volumes:
+  logs:
+    driver: local

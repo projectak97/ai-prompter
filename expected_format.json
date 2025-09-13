@@ -1,0 +1,51 @@
+{
+  "model": "deepseek-v3", 
+  "messages": [
+    {
+      "role": "system",
+      "content": "You are a helpful AI assistant specialized in software development. Follow user instructions carefully, ask clarifying questions if needed, and provide concise and structured responses."
+    },
+    {
+      "role": "user",
+      "content": "Summarize this raw text into a concise developer prompt:\n\n<raw text goes here>"
+    }
+  ],
+  "context": {
+    "conversation_id": "12345",
+    "session_metadata": {
+      "app": "my-web-app",
+      "platform": "mobile",
+      "language": "en",
+      "timezone": "Asia/Kolkata"
+    },
+    "user_profile": {
+      "id": "user-678",
+      "role": "developer",
+      "expertise_level": "intermediate"
+    }
+  },
+  "generation_config": {
+    "max_tokens": 1000,
+    "temperature": 0.7,
+    "top_p": 0.9,
+    "frequency_penalty": 0,
+    "presence_penalty": 0
+  },
+  "response_format": {
+    "type": "text", 
+    "markdown": true,
+    "structured_output": {
+      "enabled": true,
+      "schema": {
+        "summary": "string",
+        "steps": ["string"],
+        "final_prompt": "string"
+      }
+    }
+  },
+  "safety": {
+    "allow_sensitive": false,
+    "block_disallowed": true,
+    "moderation_level": "standard"
+  }
+}

@@ -28,6 +28,8 @@ share/python-wheels/
 *.egg
 MANIFEST
 
+
+Code Citations.*
 # Virtual environments
 .venv
 venv/

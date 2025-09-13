@@ -113,6 +113,7 @@ pipeline {
                     ]
                     
                                         // Store metadata for later stages
+                    
                     def buildMetadataJson = """
                     {
                         "build_info": {

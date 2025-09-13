@@ -159,19 +159,27 @@ pipeline {
                 echo 'Building Docker image...'
                 script {
                     try {
-                        // Build the Docker image
-                        def dockerImage = docker.build(
-                            "${IMAGE_URI}:${IMAGE_TAG}",
-                            "--no-cache --build-arg BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ') --build-arg BUILD_VERSION=${BUILD_NUMBER} --build-arg GIT_COMMIT=${env.GIT_COMMIT_SHORT} ${DOCKERFILE_PATH}"
-                        )
+                        // Build the Docker image using shell commands
+                        sh """
+                            docker build \
+                                --no-cache \
+                                --build-arg BUILD_DATE=\$(date -u +'%Y-%m-%dT%H:%M:%SZ') \
+                                --build-arg BUILD_VERSION=${BUILD_NUMBER} \
+                                --build-arg GIT_COMMIT=${env.GIT_COMMIT_SHORT} \
+                                -t ${IMAGE_URI}:${IMAGE_TAG} \
+                                ${DOCKERFILE_PATH}
+                        """
                         
                         // Tag with latest
-                        dockerImage.tag('latest')
+                        sh "docker tag ${IMAGE_URI}:${IMAGE_TAG} ${IMAGE_URI}:latest"
                         
                         echo 'Docker image built successfully ✓'
                         
-                        // Store image for later stages
-                        env.DOCKER_IMAGE_ID = dockerImage.id
+                        // Get the image ID for reference
+                        env.DOCKER_IMAGE_ID = sh(
+                            script: "docker images --format '{{.ID}}' ${IMAGE_URI}:${IMAGE_TAG}",
+                            returnStdout: true
+                        ).trim()
                         
                     } catch (Exception e) {
                         error("Docker build failed: ${e.getMessage()}")

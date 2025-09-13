@@ -78,13 +78,7 @@ pipeline {
                 echo "   • Registry: AWS ECR"
                 echo "   • Region: ${AWS_DEFAULT_REGION}"
                 echo "   • Repository: ${ECR_REPOSITORY}"
-                echo ""
-                echo "✅ Validation Results:"
-                echo "   • Status: ${env.VALIDATION_PASSED}"
-                echo "   • Python LOC: ${env.PROJECT_PYTHON_LOC}"
-                echo "   • Total Files: ${env.PROJECT_TOTAL_FILES}"
-                echo "   • Validation Time: ${env.VALIDATION_TIMESTAMP}"
-                echo "=" * 50
+
                 
                 script {
                     // Create comprehensive build metadata

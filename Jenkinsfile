@@ -37,8 +37,24 @@ pipeline {
                         script: "git rev-parse --short HEAD",
                         returnStdout: true
                     ).trim()
+                    env.GIT_COMMIT_FULL = sh(
+                        script: "git rev-parse HEAD",
+                        returnStdout: true
+                    ).trim()
                     env.GIT_BRANCH = sh(
                         script: "git rev-parse --abbrev-ref HEAD",
+                        returnStdout: true
+                    ).trim()
+                    env.GIT_AUTHOR = sh(
+                        script: "git log -1 --pretty=format:'%an'",
+                        returnStdout: true
+                    ).trim()
+                    env.GIT_MESSAGE = sh(
+                        script: "git log -1 --pretty=format:'%s'",
+                        returnStdout: true
+                    ).trim()
+                    env.GIT_REMOTE_URL = sh(
+                        script: "git config --get remote.origin.url",
                         returnStdout: true
                     ).trim()
                 }
@@ -47,12 +63,71 @@ pipeline {
         
         stage('Build Info') {
             steps {
-                echo "Building ${APP_NAME}"
-                echo "Branch: ${env.GIT_BRANCH}"
-                echo "Commit: ${env.GIT_COMMIT_SHORT}"
+                echo "🚀 Build Information Summary"
+                echo "=" * 50
+                echo "App Name: ${APP_NAME}"
                 echo "Build Number: ${BUILD_NUMBER}"
-                echo "Image URI: ${IMAGE_URI}:${IMAGE_TAG}"
-                echo "AWS Region: ${AWS_DEFAULT_REGION}"
+                echo "Build Date: ${new Date()}"
+                echo ""
+                echo "📁 Git Information:"
+                echo "   • Branch: ${env.GIT_BRANCH}"
+                echo "   • Commit: ${env.GIT_COMMIT_SHORT}"
+                echo "   • Full Commit: ${env.GIT_COMMIT_FULL}"
+                echo "   • Author: ${env.GIT_AUTHOR}"
+                echo "   • Message: ${env.GIT_MESSAGE}"
+                echo "   • Remote URL: ${env.GIT_REMOTE_URL}"
+                echo ""
+                echo "🐳 Docker Information:"
+                echo "   • Image URI: ${IMAGE_URI}:${IMAGE_TAG}"
+                echo "   • Registry: AWS ECR"
+                echo "   • Region: ${AWS_DEFAULT_REGION}"
+                echo "   • Repository: ${ECR_REPOSITORY}"
+                echo ""
+                echo "✅ Validation Results:"
+                echo "   • Status: ${env.VALIDATION_PASSED}"
+                echo "   • Python LOC: ${env.PROJECT_PYTHON_LOC}"
+                echo "   • Total Files: ${env.PROJECT_TOTAL_FILES}"
+                echo "   • Validation Time: ${env.VALIDATION_TIMESTAMP}"
+                echo "=" * 50
+                
+                script {
+                    // Create comprehensive build metadata
+                    def buildMetadata = [
+                        build_info: [
+                            app_name: "${APP_NAME}",
+                            build_number: "${BUILD_NUMBER}",
+                            build_date: new Date().toString(),
+                            jenkins_url: "${env.BUILD_URL}"
+                        ],
+                        git_info: [
+                            branch: "${env.GIT_BRANCH}",
+                            commit_short: "${env.GIT_COMMIT_SHORT}",
+                            commit_full: "${env.GIT_COMMIT_FULL}",
+                            author: "${env.GIT_AUTHOR}",
+                            message: "${env.GIT_MESSAGE}",
+                            remote_url: "${env.GIT_REMOTE_URL}"
+                        ],
+                        docker_info: [
+                            image_uri: "${IMAGE_URI}:${IMAGE_TAG}",
+                            image_latest: "${IMAGE_URI}:latest",
+                            registry: "AWS ECR",
+                            region: "${AWS_DEFAULT_REGION}",
+                            repository: "${ECR_REPOSITORY}"
+                        ],
+                        validation: [
+                            passed: "${env.VALIDATION_PASSED}",
+                            python_loc: "${env.PROJECT_PYTHON_LOC}",
+                            total_files: "${env.PROJECT_TOTAL_FILES}",
+                            timestamp: "${env.VALIDATION_TIMESTAMP}"
+                        ]
+                    ]
+                    
+                    // Store metadata for later stages
+                    env.BUILD_METADATA = groovy.json.JsonBuilder(buildMetadata).toPrettyString()
+                    
+                    // Write metadata to file for archiving
+                    writeFile file: 'build-metadata.json', text: env.BUILD_METADATA
+                }
             }
         }
         

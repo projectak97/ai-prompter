@@ -17,7 +17,7 @@ services:
       # - ./app.py:/app/app.py
       # - ./requirements.txt:/app/requirements.txt
       
-      # Mount for persistent data/logs (optional)
+      # Mount for persistent data/1logs (optional)
       - ./logs:/app/logs
     restart: unless-stopped
     healthcheck:

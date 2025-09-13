@@ -298,8 +298,7 @@ pipeline {
                         sh "docker push ${IMAGE_URI}:${IMAGE_TAG}"
                         echo "Pushed ${IMAGE_URI}:${IMAGE_TAG} ✓"
                         
-                        // Push latest tag
-                        sh "docker tag ${IMAGE_URI}:${IMAGE_TAG} ${IMAGE_URI}:latest"
+                        // Push latest tag (already tagged in build stage)
                         sh "docker push ${IMAGE_URI}:latest"
                         echo "Pushed ${IMAGE_URI}:latest ✓"
                         

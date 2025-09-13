@@ -113,7 +113,7 @@ pipeline {
                     ]
                     
                     // Store metadata for later stages
-                    env.BUILD_METADATA = groovy.json.JsonBuilder(buildMetadata).toPrettyString()
+                    env.BUILD_METADATA = new groovy.json.JsonBuilder(buildMetadata).toPrettyString()
                     
                     // Write metadata to file for archiving
                     writeFile file: 'build-metadata.json', text: env.BUILD_METADATA

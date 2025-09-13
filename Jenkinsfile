@@ -112,11 +112,41 @@ pipeline {
                         ]
                     ]
                     
-                    // Store metadata for later stages
-                    env.BUILD_METADATA = new groovy.json.JsonBuilder(buildMetadata).toPrettyString()
-                    
-                    // Write metadata to file for archiving
-                    writeFile file: 'build-metadata.json', text: env.BUILD_METADATA
+                                        // Store metadata for later stages
+                    def buildMetadataJson = """
+                    {
+                        "build_info": {
+                            "app_name": "${APP_NAME}",
+                            "build_number": "${BUILD_NUMBER}",
+                            "build_date": "${new Date().toString()}",
+                            "jenkins_url": "${env.BUILD_URL}"
+                        },
+                        "git_info": {
+                            "branch": "${env.GIT_BRANCH}",
+                            "commit_short": "${env.GIT_COMMIT_SHORT}",
+                            "commit_full": "${env.GIT_COMMIT_FULL}",
+                            "author": "${env.GIT_AUTHOR}",
+                            "message": "${env.GIT_MESSAGE}",
+                            "remote_url": "${env.GIT_REMOTE_URL}"
+                        },
+                        "docker_info": {
+                            "image_uri": "${IMAGE_URI}:${IMAGE_TAG}",
+                            "image_latest": "${IMAGE_URI}:latest",
+                            "registry": "AWS ECR",
+                            "region": "${AWS_DEFAULT_REGION}",
+                            "repository": "${ECR_REPOSITORY}"
+                        },
+                        "validation": {
+                            "passed": "${env.VALIDATION_PASSED}",
+                            "python_loc": "${env.PROJECT_PYTHON_LOC}",
+                            "total_files": "${env.PROJECT_TOTAL_FILES}",
+                            "timestamp": "${env.VALIDATION_TIMESTAMP}"
+                        }
+                    }"""
+                                        env.BUILD_METADATA = buildMetadataJson
+                                        
+                                        // Write metadata to file for archiving
+                                        writeFile file: 'build-metadata.json', text: buildMetadataJson
                 }
             }
         }

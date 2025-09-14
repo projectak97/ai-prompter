@@ -189,56 +189,6 @@ pipeline {
         }
         
         
-        
-        stage('Install AWS CLI') {
-            steps {
-                echo 'Installing AWS CLI...'
-                script {
-                    try {
-                        // Check if AWS CLI is already installed
-                        def awsVersion = sh(
-                            script: "aws --version 2>/dev/null || echo 'not found'",
-                            returnStdout: true
-                        ).trim()
-                        
-                        if (awsVersion.contains('not found')) {
-                            echo 'AWS CLI not found, installing AWS CLI v2...'
-                            sh """
-                                # Install AWS CLI v2 (more reliable method)
-                                if [[ "\$(uname)" == "Linux" ]]; then
-                                    # Linux installation
-                                    curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-                                    unzip -q awscliv2.zip
-                                    sudo ./aws/install || ./aws/install --bin-dir ~/.local/bin --install-dir ~/.local/aws-cli
-                                    rm -rf awscliv2.zip aws/
-                                elif [[ "\$(uname)" == "Darwin" ]]; then
-                                    # macOS installation
-                                    curl "https://awscli.amazonaws.com/AWSCLIV2.pkg" -o "AWSCLIV2.pkg"
-                                    sudo installer -pkg AWSCLIV2.pkg -target /
-                                    rm AWSCLIV2.pkg
-                                else
-                                    # Fallback to pip installation
-                                    echo 'Installing AWS CLI using pip...'
-                                    python3 -m pip install --user awscli || pip install --user awscli || pip3 install --user awscli
-                                fi
-                                
-                                # Add to PATH if needed
-                                export PATH=\$PATH:/usr/local/bin:\$HOME/.local/bin
-                                
-                                # Verify installation
-                                aws --version
-                            """
-                            echo 'AWS CLI installed successfully ✓'
-                        } else {
-                            echo "AWS CLI already installed: ${awsVersion} ✓"
-                        }
-                    } catch (Exception e) {
-                        error("AWS CLI installation failed: ${e.getMessage()}")
-                    }
-                }
-            }
-        }
-        
         stage('Configure AWS CLI') {
             steps {
                 echo 'Configuring AWS CLI...'

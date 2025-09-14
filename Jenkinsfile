@@ -3,8 +3,8 @@ pipeline {
     
     environment {
         // AWS Configuration
-        AWS_DEFAULT_REGION = 'us-east-1'  // Change to your preferred region
-        AWS_ACCOUNT_ID = '123456789012'   // Replace with your AWS Account ID
+        AWS_DEFAULT_REGION = 'us-west-2'  // Change to your preferred region
+        AWS_ACCOUNT_ID = '149534582697'   // Replace with your AWS Account ID
         ECR_REPOSITORY = 'ai-prompt-generator'
         IMAGE_TAG = "${BUILD_NUMBER}"
         IMAGE_URI = "${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_DEFAULT_REGION}.amazonaws.com/${ECR_REPOSITORY}"
@@ -195,18 +195,26 @@ pipeline {
                 echo 'Configuring AWS CLI...'
                 script {
                     try {
-                        // Configure AWS CLI with credentials
-                        sh """
-                            # Configure AWS credentials
-                            aws configure set aws_access_key_id ${AWS_ACCESS_KEY_ID}
-                            aws configure set aws_secret_access_key ${AWS_SECRET_ACCESS_KEY}
-                            aws configure set default.region ${AWS_DEFAULT_REGION}
-                            aws configure set default.output json
-                            
-                            # Verify AWS CLI configuration
-                            echo 'Testing AWS CLI configuration...'
-                            aws sts get-caller-identity
-                        """
+                        // Configure AWS CLI with credentials using withCredentials for security
+                        withCredentials([
+                            usernamePassword(
+                                credentialsId: 'aws-credentials', 
+                                usernameVariable: 'AWS_ACCESS_KEY_ID', 
+                                passwordVariable: 'AWS_SECRET_ACCESS_KEY'
+                            )
+                        ]) {
+                            sh """
+                                # Configure AWS credentials
+                                aws configure set aws_access_key_id \${AWS_ACCESS_KEY_ID}
+                                aws configure set aws_secret_access_key \${AWS_SECRET_ACCESS_KEY}
+                                aws configure set default.region ${AWS_DEFAULT_REGION}
+                                aws configure set default.output json
+                                
+                                # Verify AWS CLI configuration
+                                echo 'Testing AWS CLI configuration...'
+                                aws sts get-caller-identity
+                            """
+                        }
                         echo 'AWS CLI configured successfully ✓'
                     } catch (Exception e) {
                         error("AWS CLI configuration failed: ${e.getMessage()}")
